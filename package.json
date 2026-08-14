@@ -1,0 +1,13 @@
+{
+  "name": "taskflow-root",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "install:all": "npm --prefix server install && npm --prefix client install",
+    "db:init": "npm --prefix server run db:init",
+    "dev:server": "npm --prefix server run dev",
+    "dev:client": "npm --prefix client run dev",
+    "dev": "npm --prefix server run db:init && (npm --prefix server run dev & npm --prefix client run dev)",
+    "test": "npm --prefix server test"
+  }
+}

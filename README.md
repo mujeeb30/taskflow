@@ -6,7 +6,7 @@ TaskFlow is a lightweight, full-stack Kanban task management board designed for 
 
 ## 🔗 Repository & Submission Info
 
-- **Repository**: *(Insert your public Git repository URL here before submitting)*
+- **Repository**: [https://github.com/mujeeb30/taskflow.git](https://github.com/mujeeb30/taskflow.git)
 - **Tech Stack**:
   - **Frontend**: React 18, Vite, Lucide Icons, Modern CSS (Glassmorphism theme)
   - **Backend**: Node.js, Express (Pure MVC architecture)

@@ -1,115 +1,119 @@
-# 📋 TaskFlow — Full-Stack Kanban Application
+# 📋 TaskFlow — Easy-to-Understand Full-Stack Task Board
 
-TaskFlow is a lightweight, full-stack Kanban task management board designed for small teams. Built with a clean **Model-View-Controller (MVC)** backend architecture in Node.js/Express, a raw SQL SQLite database layer, automated test suite (Jest + Supertest), and a modern React frontend UI featuring drag-and-drop task movement, priority filtering, and real-time title search.
+TaskFlow is a simple, lightweight task management app (like Trello). You can create tasks, edit them, delete them, filter by priority, search by title, and move tasks between columns using **drag-and-drop** or a **dropdown menu**.
 
----
-
-## 🔗 Repository & Submission Info
-
-- **Repository**: [https://github.com/mujeeb30/taskflow.git](https://github.com/mujeeb30/taskflow.git)
-- **Tech Stack**:
-  - **Frontend**: React 18, Vite, Lucide Icons, Modern CSS (Glassmorphism theme)
-  - **Backend**: Node.js, Express (Pure MVC architecture)
-  - **Database**: SQLite3 (`better-sqlite3` driver with foreign key constraints)
-  - **Testing**: Jest, Supertest
+All changes are saved to a real **SQLite database** on your machine.
 
 ---
 
-## ⚡ Quick Start (Setup Instructions from Fresh Clone)
+## 📁 Simple Folder Structure Breakdown
 
-Follow these steps to run TaskFlow locally from a fresh checkout:
-
-### Prerequisites
-- **Node.js**: v18.0.0 or higher
-- **npm**: v9.0.0 or higher
-
-### Step 1: Clone Repository & Install Dependencies
-```bash
-git clone <your-repository-url>
-cd taskflow
-
-# Install dependencies for both root, server, and client apps
-npm run install:all
-```
-
-### Step 2: Initialize & Seed Database
-```bash
-npm run db:init
-```
-*This executes `server/db/schema.sql` and `server/db/seed.sql` to generate the local SQLite database file `server/db/taskflow.db`.*
-
-### Step 3: Start Application Locally
-```bash
-# Runs backend API (Port 5001) and React dev server (Port 3000) concurrently
-npm run dev
-```
-Open **`http://localhost:3000`** in your browser.
-
-*(Alternatively, you can also run `npm --prefix server run start` to serve the unified production build at **`http://localhost:5001`**).*
-
----
-
-## 🧪 Running Automated Backend Tests
-
-TaskFlow includes automated backend integration and unit tests covering validation rules, task movement, and raw database queries:
-
-```bash
-# Run Jest test suite
-npm test
-```
-
-### Automated Tests Overview (`server/tests/`):
-1. **Title Validation Test** ([`task.test.js`](file:///Users/shaikmujeeb/.gemini/antigravity/scratch/taskflow/server/tests/task.test.js)): Verifies `POST /api/tasks` with an empty or whitespace title is rejected with HTTP `400 Bad Request`.
-2. **Task Movement Test** ([`task.test.js`](file:///Users/shaikmujeeb/.gemini/antigravity/scratch/taskflow/server/tests/task.test.js)): Verifies `PATCH /api/tasks/:id/move` updates column and status correctly in the database.
-3. **Direct Database Layer Test** ([`db.test.js`](file:///Users/shaikmujeeb/.gemini/antigravity/scratch/taskflow/server/tests/db.test.js)): Verifies raw SQL queries (`getTasksPerColumn` and `getTasksByPriority`) directly against seeded database rows.
-
----
-
-## 🏛️ Backend Architecture (Model-View-Controller)
-
-TaskFlow uses a strict **MVC Layered Architecture**:
+The project is split into two main parts: **Backend (`server/`)** and **Frontend (`client/`)**.
 
 ```
 taskflow/
-├── server/
+├── server/                    # Everything related to Backend API & Database
 │   ├── config/
-│   │   └── database.js          # SQLite connection manager & query execution wrapper
+│   │   └── database.js        # Opens connection to SQLite database
 │   ├── db/
-│   │   ├── schema.sql           # CREATE TABLE definitions, keys, and indexes
-│   │   ├── seed.sql             # Initial board, column, and task seed data
-│   │   └── initDb.js            # Database creation & seeding script
-│   ├── models/                  # [M] MODEL LAYER (Raw SQL Queries)
-│   │   ├── boardModel.js        # Board hierarchy queries
-│   │   ├── columnModel.js       # Column queries & tasks-per-column aggregation
-│   │   └── taskModel.js         # Task CRUD, task movement & priority queries
-│   ├── controllers/             # [C] CONTROLLER LAYER (Request Logic & Handlers)
-│   │   ├── boardController.js   # Board endpoint request handler
-│   │   ├── columnController.js  # Column & task count handler
-│   │   └── taskController.js    # Task management handlers
-│   ├── routes/                  # ROUTING LAYER (Express REST Routers)
-│   │   ├── boardRoutes.js       # /api/boards routes
-│   │   ├── columnRoutes.js      # /api/columns routes
-│   │   └── taskRoutes.js         # /api/tasks routes
+│   ├── schema.sql             # SQL code that creates tables (Boards, Columns, Tasks)
+│   ├── seed.sql               # Default sample data to start with
+│   └── initDb.js              # Script that runs schema.sql & seed.sql
+│
+│   ├── models/                # [M] MODEL: Talks directly to Database using SQL queries
+│   │   ├── boardModel.js      # Gets full board with columns and tasks
+│   │   ├── columnModel.js     # Gets columns and counts tasks per column
+│   │   └── taskModel.js       # Creates, updates, moves, deletes, and filters tasks
+│   │
+│   ├── controllers/           # [C] CONTROLLER: Handles requests, checks inputs, sends JSON responses
+│   │   ├── boardController.js # Handles GET /api/boards
+│   │   ├── columnController.js# Handles GET /api/columns and GET /api/columns/tasks-per-column
+│   │   └── taskController.js  # Handles create, update, move, delete task requests
+│   │
+│   ├── routes/                # ROUTING: Connects URL paths to Controllers
+│   │   ├── boardRoutes.js     # Map /api/boards URLs
+│   │   ├── columnRoutes.js    # Map /api/columns URLs
+│   │   └── taskRoutes.js      # Map /api/tasks URLs
+│   │
 │   ├── middlewares/
-│   │   ├── validation.js        # Payload & non-empty title validation
-│   │   └── errorHandler.js      # Global error handler
-│   └── tests/                   # AUTOMATED TEST SUITE
-│       ├── task.test.js         # API integration & validation tests
-│       └── db.test.js           # Direct SQL database model layer tests
+│   │   ├── validation.js      # Rejects requests if task title is empty (400 Bad Request)
+│   │   └── errorHandler.js    # Catches errors cleanly
+│   │
+│   ├── tests/                 # AUTOMATED TESTS
+│   │   ├── task.test.js       # Tests validation rules and task movement
+│   │   └── db.test.js         # Tests raw SQL queries directly
+│   │
+│   ├── app.js                 # Sets up Express app & links routes
+│   └── server.js              # Starts the server on port 5001
+│
+└── client/                    # Frontend React User Interface
+    └── src/
+        ├── components/
+        │   ├── Header.jsx     # Top navbar header
+        │   ├── FilterBar.jsx  # Search bar, priority filter dropdown, task count stats
+        │   ├── Board.jsx      # Holds the columns
+        │   ├── Column.jsx     # Renders column header & drop zone for drag-and-drop
+        │   ├── TaskCard.jsx   # Individual task card (drag handle, priority badge, edit/delete)
+        │   ├── TaskModal.jsx  # Form modal to create or edit a task
+        │   └── Toast.jsx      # Red popup box if an error happens
+        ├── services/
+        │   └── api.js         # Makes fetch requests to http://localhost:5001/api
+        ├── styles/
+        │   └── index.css      # Custom styling & glassmorphism theme
+        ├── App.jsx            # Main React component
+        └── main.jsx           # React app entry point
 ```
 
 ---
 
-## 🗄️ Database Schema & Required Queries
+## 🔄 How Request Flow Works (MVC Step-by-Step)
 
-### Relational Schema (`server/db/schema.sql`)
-- **`boards`**: `id` (PRIMARY KEY), `name` (NOT NULL), `created_at`.
-- **`columns`**: `id` (PRIMARY KEY), `board_id` (FOREIGN KEY $\rightarrow$ `boards.id`), `name` (NOT NULL), `position`.
-- **`tasks`**: `id` (PRIMARY KEY), `column_id` (FOREIGN KEY $\rightarrow$ `columns.id`), `title` (NOT NULL), `description`, `priority` (CHECK constraint: `'Low'`, `'Medium'`, `'High'`), `position`, `created_at`.
+Here is a clear example of what happens when a user creates a new task:
 
-### Required Non-Trivial SQL Queries (Section 2.5)
+```
+[User Clicks "Create Task"] 
+           │
+           ▼
+1. React Form (`TaskModal.jsx`) 
+   Checks that the title is not empty on the screen.
+           │ Sends POST request to /api/tasks
+           ▼
+2. Express Route (`taskRoutes.js`)
+   Receives POST /api/tasks and sends it to `validateTaskCreation` middleware.
+           │
+           ▼
+3. Validation Middleware (`validation.js`)
+   If title is missing or empty, stops immediately and returns 400 Bad Request:
+   {"error": "Task title is required and cannot be empty."}
+           │
+           ▼
+4. Task Controller (`taskController.js`)
+   Receives valid title, description, priority, and column_id from request body.
+           │
+           ▼
+5. Task Model (`taskModel.js`)
+   Runs raw SQL `INSERT INTO tasks ...` and saves it into `taskflow.db`.
+           │
+           ▼
+6. Response sent back to React UI
+   React reloads the board data and shows the new task on the screen.
+```
 
-#### Query 1: Tasks Count Per Column (`ColumnModel.getTasksPerColumn`)
+---
+
+## 🗄️ Database Tables & SQL Queries
+
+### 1. Database Schema (`server/db/schema.sql`)
+- **`boards`**: `id`, `name`, `created_at`
+- **`columns`**: `id`, `board_id` (links to board), `name`, `position`
+- **`tasks`**: `id`, `column_id` (links to column), `title` (cannot be empty), `description`, `priority` (Low / Medium / High), `position`, `created_at`
+
+---
+
+### 2. The Two Required Database Queries (Section 2.5)
+
+#### 📊 Query 1: Count tasks per column (`ColumnModel.getTasksPerColumn`)
+This query counts how many tasks are inside each column on a board:
 ```sql
 SELECT 
   c.id AS column_id, 
@@ -118,12 +122,13 @@ SELECT
   COUNT(t.id) AS task_count
 FROM columns c
 LEFT JOIN tasks t ON c.id = t.column_id
-WHERE c.board_id = ?
+WHERE c.board_id = 1
 GROUP BY c.id, c.name, c.position
 ORDER BY c.position ASC;
 ```
 
-#### Query 2: Tasks by Priority Ordered Newest First (`TaskModel.getTasksByPriority`)
+#### 🎯 Query 2: Filter tasks by priority, newest first (`TaskModel.getTasksByPriority`)
+This query fetches tasks matching a specific priority (e.g. 'High') ordered by creation date newest first:
 ```sql
 SELECT 
   t.id, 
@@ -135,26 +140,61 @@ SELECT
   t.created_at
 FROM tasks t
 JOIN columns c ON t.column_id = c.id
-WHERE t.priority = ?
+WHERE t.priority = 'High'
 ORDER BY t.created_at DESC;
 ```
 
 ---
 
-## 💭 Project Reflection & Submission Q&A
+## 🚀 How to Run the Project (Step-by-Step)
 
-### 1. Decisions & Assumptions
-- **Single Workspace Context**: Designed the relational schema (`boards` $\rightarrow$ `columns` $\rightarrow$ `tasks`) with full multi-board capacity, defaulting to `board_id = 1` for a single team workspace.
-- **Dual Column Movement**: Implemented both native **HTML5 Drag-and-Drop** and a **Quick Dropdown Control** on each task card for maximum accessibility across mobile and desktop devices.
-- **Database Driver**: Used `better-sqlite3` for zero-config file persistence without requiring external database server daemons.
+### Prerequisites
+Make sure you have **Node.js** installed on your computer.
 
-### 2. Future Improvements
-- **Sub-task Checklists**: Allow adding checkable sub-items within task cards.
-- **Activity Log**: Maintain a historical log of task status transitions and edits.
-- **WebSockets / SSE**: Push real-time updates across multiple open browser tabs.
+### Step 1: Install Dependencies
+Open terminal in the project folder and run:
+```bash
+npm run install:all
+```
+*(This installs packages for both backend and frontend automatically)*.
 
-### 3. Roughly How Long You Spent
-- **Total Time**: ~2.5 hours (architecture planning, database design, backend MVC implementation, unit test writing, and React UI development).
+### Step 2: Initialize Database
+Run:
+```bash
+npm run db:init
+```
+*(This creates the `taskflow.db` SQLite file and fills it with sample seed data)*.
 
-### 4. One Thing Learned / Found Interesting
-- Using `better-sqlite3`'s synchronous prepared statements made writing atomic transactions and custom SQL aggregation queries (`LEFT JOIN ... GROUP BY`) extremely fast and clean without the bloat of heavy ORMs.
+### Step 3: Start Application
+Run:
+```bash
+npm run dev
+```
+Open **`http://localhost:3000`** in your web browser.
+
+---
+
+## 🧪 Running Tests
+
+To run the automated test suite:
+```bash
+npm test
+```
+
+### What the tests check:
+1. **Empty Title Validation**: Confirms that submitting a task without a title fails with error code 400.
+2. **Moving Tasks**: Confirms that moving a task to another column updates its column ID in the database.
+3. **Database Queries**: Directly runs `getTasksPerColumn` and `getTasksByPriority` against the database to confirm SQL logic is correct.
+
+---
+
+## 📝 Answers to Submission Questions
+
+1. **Decisions & Assumptions**:
+   - Built with support for multiple boards, defaulting to `board_id = 1` for a single workspace view.
+   - Added both **Drag-and-Drop** and a **Quick Dropdown Select** on each card so moving tasks works easily on mobile phones and touchscreens too.
+2. **What would be added with more time**:
+   - User assignment avatars on task cards.
+   - History activity log showing who moved what task and when.
+3. **Time Spent**: ~2.5 hours total.
+4. **Interesting Insight**: Working with raw SQLite SQL statements (`better-sqlite3`) was much simpler and faster than using heavy ORM libraries like Prisma or TypeORM.
